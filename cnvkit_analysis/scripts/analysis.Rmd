@@ -1,0 +1,92 @@
+---
+author: "Anthony Veltri"
+title: "cnvkit_analysis"
+date: '2022-06-06'
+---
+
+Downloaded mm10 fasta, gtf and refflat from UCSC genome browser.    
+Downloaded mm9 SureSelect Bait BED file (`./pipeline_resources/S0276129_Covered.bed`) from [Agilent SureDesign website](https://earray.chem.agilent.com/suredesign/)  
+- This file contains the regions covered by probes in the SureSelect kit.
+Converted mm9 Bait BED file to mm10 using the [UCSC liftover web tool](https://genome.ucsc.edu/cgi-bin/hgLiftOver)  
+- There were a few conversions that were not possible, but I was satisfied that they were minimal.  
+Environment set up with `conda`. Specification is in `../environment.yml`.
+
+> ❗️ All commands are meant to be run with the `scripts` folder as the working directory
+
+# Align raw data
+
+## Generate BWA index based on mm10 genome
+```{bash}
+bwa index -p ../pipeline_resources/bwa_index_mm10/bwa_index_mm10 ../pipeline_resources/mm10.fa
+```
+
+## Run alignment with BWA
+
+Run python script `run_alignment.py`
+```{bash}
+python3 run_alignment.py bwa
+```
+
+# Prepare inputs for CNVkit
+
+## Convert SAM to BAM
+
+```{bash}
+bash ./samtools_sam2bam.sh
+```
+
+## Sort/index BAM files
+
+```{bash}
+bash ./samtools_sort_index_bams.sh
+```
+
+> ⚠️ NOTE: `A4_B5219_tail.bam` should actually be named `A4_B2519_tail.bam` (2 and 5 are flipped). This is based on the supplied metadata sheet. The bam file and its index were corrected via the python script below.
+## Rename incorrectly named files
+```{python3}
+import re
+import shutil
+import os
+
+files = [file for file in os.listdir("../aligned_data/bwa_mem_mm10/") if "B5219" in file]
+for file in files:
+    shutil.move("../aligned_data/bwa_mem_mm10/"+file, "../aligned_data/bwa_mem_mm10/"+re.sub("B5219", "B2519", file))
+```
+
+## Mark duplicates with picard and rename indices to match
+```{bash}
+bash picard_markdups.sh && bash rename_indices.sh
+```
+
+## Fix Bed file (remove first two lines so that CNVkit can use it)
+```{bash}
+tail -n +2 ../pipeline_resources/S0276129_Covered.bed > ../pipeline_resources/fixed_bait_bed_mm9.bed
+```
+
+# Run CNVkit and output plots (matched normal samples)
+output to `../results/bwa_mem_mm10_matched/`
+
+Run python script `run_cnvkit.py`
+```{bash}
+python3 ./run_cnvkit.py
+```
+
+# Run `call` with more stringent cutoffs
+```{bash}
+bash ./recall_highstringency.sh
+```
+
+# Generate plots
+```{bash}
+python3 ./plotting.py
+```
+
+# get metrics
+```{bash}
+for bamfile in $(ls ../aligned_data/bwa_mem_mm10/*.bam);
+    do
+    echo $bamfile; samtools view -c -F 260 $bamfile; # get number of aligned reads
+done
+
+cnvkit.py metrics ../results/bwa_mem_mm10_matched/B3520/F4_B3520_VQD4_MM.sorted.markdups.cnr ../results/bwa_mem_mm10_matched/B3518/D4_B3518_VQD5_MM.sorted.markdups.cnr ../results/bwa_mem_mm10_matched/B2576/F3_B2576_VQlambdaCD138_MM.sorted.markdups.cnr ../results/bwa_mem_mm10_matched/B2519/B4_B2519_MM.sorted.markdups.cnr ../results/bwa_mem_mm10_matched/B2518/7733_B2518_VQD1_MM.cnr -s ../results/bwa_mem_mm10_matched/B3520/F4_B3520_VQD4_MM.sorted.markdups.cns ../results/bwa_mem_mm10_matched/B3518/D4_B3518_VQD5_MM.sorted.markdups.cns ../results/bwa_mem_mm10_matched/B2576/F3_B2576_VQlambdaCD138_MM.sorted.markdups.cns ../results/bwa_mem_mm10_matched/B2519/B4_B2519_MM.sorted.markdups.cns ../results/bwa_mem_mm10_matched/B2518/7733_B2518_VQD1_MM.cns
+```

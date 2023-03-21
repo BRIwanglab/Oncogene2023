@@ -8,10 +8,11 @@ Multiple myeloma (MM) is a cancer of malignant plasma cells in the bone marrow a
 
 ## Methods and Code
 - B cell receptor (BCR) Immunoglobulin heavy (IgH) chain and Immunoglobulin light (IgL) chain repertoire sequencing
-  - VQ_Samples_RepSeq_Mutation_Analysis.Rmd
+  - `VQ_Samples_RepSeq_Mutation_Analysis.Rmd`
 - Whole Exome Sequencing (WES) and copy number variation (CNV) analysis
+  - See `./cnvkit_analysis/README.md` and `./cnvkit_analysis/scripts/analysis.Rmd`
 - RNA-Seq
-  - VQ_RNASeq_Analysis.Rmd
+  - `VQ_RNASeq_Analysis.Rmd`
 
 ## SessionInfo
 

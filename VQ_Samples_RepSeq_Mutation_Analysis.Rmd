@@ -1,0 +1,189 @@
+---
+title: "VQ_Samples_RepSeq_Mutation_Analysis"
+author: "Mei Yu"
+date: "2021-10-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+set.seed(20220714)
+```
+
+```{r load packages}
+library(alakazam)
+library(shazam)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r load data}
+setwd("/Volumes/Lychee/SeqencingRawData/MY20201012_MM_TCR_RepSeq/MM_RepSeq_Raw/assemble_UMI_2/Igblast/")
+HC.4935 <- read.csv("4935_HC_assemble-pass_igblast.tsv", sep ="\t", header = T)
+summary(HC.4935$productive)
+HC.4935.productive <- HC.4935 %>% filter(productive == T)
+str(HC.4935.productive)
+HC.4935.mutations <- observedMutations(HC.4935.productive, sequenceColumn = "sequence_alignment",
+                                       germlineColumn = "germline_alignment",
+                                       regionDefinition = NULL,
+                                       frequency = T,
+                                       nproc = 1)
+str(HC.4935.mutations)
+HC.4935.mu.count <- HC.4935.mutations %>% select(sequence_id, starts_with("mu_count_"))
+HC.4935.mu.freq <- HC.4935.mutations %>% select(sequence_id, starts_with("mu_freq_"))
+HC.4935.mu.freq <- HC.4935.mu.freq %>% mutate(mu_freq_r = mu_freq_seq_r * 100,
+                                              mu_freq_s = mu_freq_seq_s * 100)
+HC.4935.mu.freq <- HC.4935.mu.freq %>% mutate(total_mu_freq = mu_freq_r + mu_freq_s)
+
+HC.4938 <- read.csv("4938_HC_assemble-pass_igblast.tsv", sep ="\t", header = T)
+summary(HC.4938$productive)
+HC.4938.productive <- HC.4938 %>% filter(productive == T)
+str(HC.4935.productive)
+HC.4938.mutations <- observedMutations(HC.4938.productive, sequenceColumn = "sequence_alignment",
+                                       germlineColumn = "germline_alignment",
+                                       regionDefinition = NULL,
+                                       frequency = T,
+                                       nproc = 1)
+str(HC.4935.mutations)
+HC.4938.mu.count <- HC.4938.mutations %>% select(sequence_id, starts_with("mu_count_"))
+HC.4938.mu.freq <- HC.4938.mutations %>% select(sequence_id, starts_with("mu_freq_"))
+HC.4938.mu.freq <- HC.4938.mu.freq %>% mutate(mu_freq_r = mu_freq_seq_r * 100,
+                                              mu_freq_s = mu_freq_seq_s * 100)
+HC.4938.mu.freq <- HC.4938.mu.freq %>% mutate(total_mu_freq = mu_freq_r + mu_freq_s)
+
+HC.VQ_D1 <- read.csv("VQ_D1_HC_assemble-pass_igblast.tsv", sep ="\t", header = T)
+summary(HC.VQ_D1$productive)
+HC.VQ_D1.productive <- HC.VQ_D1 %>% filter(productive == T)
+HC.VQ_D1.mutations <- observedMutations(HC.VQ_D1.productive, sequenceColumn = "sequence_alignment",
+                                       germlineColumn = "germline_alignment",
+                                       regionDefinition = NULL,
+                                       frequency = T,
+                                       nproc = 1)
+HC.VQ_D1.mu.count <- HC.VQ_D1.mutations %>% select(sequence_id, starts_with("mu_count_"))
+HC.VQ_D1.mu.freq <- HC.VQ_D1.mutations %>% select(sequence_id, starts_with("mu_freq_"))
+HC.VQ_D1.mu.freq <- HC.VQ_D1.mu.freq %>% mutate(mu_freq_r = mu_freq_seq_r * 100,
+                                              mu_freq_s = mu_freq_seq_s * 100)
+HC.VQ_D1.mu.freq <- HC.VQ_D1.mu.freq %>% mutate(total_mu_freq = mu_freq_r + mu_freq_s)
+
+HC.VQ_D2 <- read.csv("VQ_D2_HC_assemble-pass_igblast.tsv", sep ="\t", header = T)
+summary(HC.VQ_D2$productive)
+HC.VQ_D2.productive <- HC.VQ_D2 %>% filter(productive == T)
+HC.VQ_D2.mutations <- observedMutations(HC.VQ_D2.productive, sequenceColumn = "sequence_alignment",
+                                        germlineColumn = "germline_alignment",
+                                        regionDefinition = NULL,
+                                        frequency = T,
+                                        nproc = 1)
+HC.VQ_D2.mu.count <- HC.VQ_D2.mutations %>% select(sequence_id, starts_with("mu_count_"))
+HC.VQ_D2.mu.freq <- HC.VQ_D2.mutations %>% select(sequence_id, starts_with("mu_freq_"))
+HC.VQ_D2.mu.freq <- HC.VQ_D2.mu.freq %>% mutate(mu_freq_r = mu_freq_seq_r * 100,
+                                                mu_freq_s = mu_freq_seq_s * 100)
+HC.VQ_D2.mu.freq <- HC.VQ_D2.mu.freq %>% mutate(total_mu_freq = mu_freq_r + mu_freq_s)
+
+HC.VQ_D4 <- read.csv("VQ_D4_HC_assemble-pass_igblast.tsv", sep ="\t", header = T)
+summary(HC.VQ_D4$productive)
+HC.VQ_D4.productive <- HC.VQ_D4 %>% filter(productive == T)
+HC.VQ_D4.mutations <- observedMutations(HC.VQ_D4.productive, sequenceColumn = "sequence_alignment",
+                                        germlineColumn = "germline_alignment",
+                                        regionDefinition = NULL,
+                                        frequency = T,
+                                        nproc = 1)
+HC.VQ_D4.mu.count <- HC.VQ_D4.mutations %>% select(sequence_id, starts_with("mu_count_"))
+HC.VQ_D4.mu.freq <- HC.VQ_D4.mutations %>% select(sequence_id, starts_with("mu_freq_"))
+HC.VQ_D4.mu.freq <- HC.VQ_D4.mu.freq %>% mutate(mu_freq_r = mu_freq_seq_r * 100,
+                                                mu_freq_s = mu_freq_seq_s * 100)
+HC.VQ_D4.mu.freq <- HC.VQ_D4.mu.freq %>% mutate(total_mu_freq = mu_freq_r + mu_freq_s)
+
+HC.VQ_D5 <- read.csv("VQ_D5_HC_assemble-pass_igblast.tsv", sep ="\t", header = T)
+summary(HC.VQ_D5$productive)
+HC.VQ_D5.productive <- HC.VQ_D5 %>% filter(productive == T)
+HC.VQ_D5.mutations <- observedMutations(HC.VQ_D5.productive, sequenceColumn = "sequence_alignment",
+                                        germlineColumn = "germline_alignment",
+                                        regionDefinition = NULL,
+                                        frequency = T,
+                                        nproc = 1)
+HC.VQ_D5.mu.count <- HC.VQ_D5.mutations %>% select(sequence_id, starts_with("mu_count_"))
+HC.VQ_D5.mu.freq <- HC.VQ_D5.mutations %>% select(sequence_id, starts_with("mu_freq_"))
+HC.VQ_D5.mu.freq <- HC.VQ_D5.mu.freq %>% mutate(mu_freq_r = mu_freq_seq_r * 100,
+                                                mu_freq_s = mu_freq_seq_s * 100)
+HC.VQ_D5.mu.freq <- HC.VQ_D5.mu.freq %>% mutate(total_mu_freq = mu_freq_r + mu_freq_s)
+```
+
+```{r summarize data}
+HC.samples <- c("HC.4935", "HC.4938", "HC.VQ_D1", "HC.VQ_D2", "HC.VQ_D4", "HC.VQ_D5")
+temp <- strsplit(HC.samples, "\\.")[[1]][2]
+temp.r <- c()
+temp.s <- c()
+temp.total <- c()
+mut.freq.r <- c()
+mut.freq.s <- c()
+mut.freq.total <- c()
+for(sample in HC.samples){
+  sample.name <- sample
+  temp.s <- get(paste0(sample, ".mu.freq")) %>% 
+    select(mu_freq_s) %>% mutate(Sample.ID = as.character((strsplit(sample.name, "\\."))[[1]][2]))
+  temp.r <- get(paste0(sample, ".mu.freq")) %>% 
+    select(mu_freq_r) %>% mutate(Sample.ID = as.character((strsplit(sample.name, "\\."))[[1]][2]))
+  temp.total <- get(paste0(sample, ".mu.freq")) %>% 
+    select(total_mu_freq) %>% mutate(Sample.ID = as.character((strsplit(sample.name, "\\."))[[1]][2]))
+  
+  if(is.null(mut.freq.r)){
+    mut.freq.r <- temp.r
+    mut.freq.s <- temp.s
+    mut.freq.total <- temp.total
+  } else {
+    mut.freq.r <- bind_rows(mut.freq.r, temp.r)
+    mut.freq.s <- bind_rows(mut.freq.s, temp.s)
+    mut.freq.total <- bind_rows(mut.freq.total, temp.total)
+  }
+}
+
+```
+
+```{r statistical analysis}
+# statistical analysis
+summary.r <- mut.freq.r %>% 
+  group_by(Sample.ID) %>% 
+  summarise(mean.r = mean(mu_freq_r), median.r = median(mu_freq_r),
+            sd.r = sd(mu_freq_r))
+summary.s <- mut.freq.s %>%
+  group_by(Sample.ID) %>% 
+  summarise(mean.s = mean(mu_freq_s), median.s = median(mu_freq_s),
+            sd.s = sd(mu_freq_s))
+summary.total <- mut.freq.total %>%
+  group_by(Sample.ID) %>% 
+  summarise(mean.total = mean(total_mu_freq), median.total = median(total_mu_freq),
+            sd.total = sd(total_mu_freq))
+mut.merge <- function(x, y){
+  summary <- merge(x, y, by = "Sample.ID", all.x = T, all.y = T)
+  return(summary)
+}
+mutation.summary <- Reduce(mut.merge, list(summary.s, summary.r, summary.total))
+#write.csv(mutation.summary, "Statistical_Summary_mut_freq_MM_RepSeq.csv")
+```
+
+```{r making violin plots}
+# making violin plots
+library(ggplot2)
+mut.freq.r$Sample.ID <- factor(mut.freq.r$Sample.ID)
+mut.freq.s$Sample.ID <- factor(mut.freq.s$Sample.ID)
+mut.freq.total$Sample.ID <- factor(mut.freq.total$Sample.ID)
+summary(mut.freq.total$Sample.ID)
+p <- ggplot(mut.freq.total, aes(x = Sample.ID, y = total_mu_freq, fill = Sample.ID)) + geom_violin(trim = F)
+p + 
+  scale_x_discrete(limits = "VQ_D5") + 
+  stat_summary(fun.data = "mean_sdl", geom = "pointrange", color="black") + ylim(0, 40)
+p
+
+r <- ggplot(mut.freq.r, aes(x = Sample.ID, y = mu_freq_r, fill = Sample.ID)) + geom_violin(trim = F)
+r + 
+  scale_x_discrete(limits = "VQ_D5") + 
+  stat_summary(fun.data = "mean_sdl", geom = "pointrange", color="black") + ylim(0, 40)
+r
+
+s <- ggplot(mut.freq.s, aes(x = Sample.ID, y = mu_freq_s, fill = Sample.ID)) + geom_violin(trim = F)
+s + 
+  scale_x_discrete(limits = "4938") + 
+  stat_summary(fun.data = "mean_sdl", geom = "pointrange", color="black") + ylim(0, 9)
+s
+```
+
